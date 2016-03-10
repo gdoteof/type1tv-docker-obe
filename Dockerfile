@@ -38,18 +38,28 @@ RUN apt-get update && \
     \
     apt-get remove -y libreadline-dev libzvbi-dev libtwolame-dev \
     autoconf libtool git wget curl \
-    manpages manpages-dev g++ g++-4.6 build-essential && \
+    manpages manpages-dev g++ g++-4.6 build-essential
+# change version of blackmagic video here
+ADD Blackmagic_Desktop_Video_Linux_10.6.1 /data/blackmagicvideo
+
+RUN apt-get update && apt-get install -y dkms libgl1-mesa-glx libxml2 linux-headers-`uname -r` && \
+    \
+    cd /data/blackmagicvideo/deb/amd64 && sudo dpkg -i desktopvideo_*.deb && \
+    cd ../../.. && rm -rf blackmagicvideo  && \
     \
     apt-get autoclean -y && apt-get autoremove -y && apt-get clean -y && \
     rm -rf /var/lib/apt/lists/* && \
     rm -r /tmp/*
+
+
+
 
 COPY obe.conf /etc/obe.conf
 RUN     useradd -m default
 
 WORKDIR /home/default
 
-USER    default
+USER    root
 ENV     HOME /home/default
 
 CMD ["/usr/bin/obecli","--config-file=/etc/obe.conf"]
